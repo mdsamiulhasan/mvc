@@ -1,0 +1,13 @@
+  public StudentVM()
+  {
+      this.CourseList = new List<Admission>();
+  }
+  public int sid { get; set; }
+  [Display(Name = "Student Name")]
+  public string sname { get; set; }
+  public DateTime age { get; set; }
+  public int mark { get; set; }
+  public bool ismorning { get; set; }
+  public string picture { get; set; }
+  public HttpPostedFileBase pictureFile { get; set; }
+  public List<Admission> CourseList { get; set; }
