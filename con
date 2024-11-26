@@ -1,0 +1,112 @@
+ public ActionResult Index()
+ {
+     //eager loading
+     var students = db.Students.Include(c => c.Admissions.Select(b => b.Course)).OrderByDescending(x => x.sid).ToList();
+     return View(students);
+ }
+ //partial
+ public ActionResult Addmore(int? id)
+ {
+     ViewBag.course = new SelectList(db.Courses.ToList(),"cid","cname",id??0);
+     return PartialView("_addmore");
+ }
+ //create
+ public ActionResult Create()
+ {
+     return View();
+ }
+ //post
+ [HttpPost]
+ public ActionResult Create(StudentVM StudentVM, int[] cid)
+ {
+     var st = new Student()
+     {
+         sid = StudentVM.sid,
+         sname = StudentVM.sname,
+         age = StudentVM.age,
+         mark = StudentVM.mark,
+         ismorning = StudentVM.ismorning,
+
+     };
+
+     HttpPostedFileBase file = StudentVM.pictureFile;
+     if (file != null)
+     {
+         string filename = Path.Combine("/images/", DateTime.Now.Ticks.ToString() + Path.GetExtension(file.FileName));
+         file.SaveAs(Server.MapPath(filename));
+         st.picture = filename;
+     }       
+     foreach (var c in cid)
+     {
+         Admission ad = new Admission()
+         {
+             Student = st,
+             sid = StudentVM.sid,
+             cid = c,
+         };
+         db.Admissions.Add(ad);
+
+     }
+     db.SaveChanges();
+     return RedirectToAction("Index");
+ }
+ [HttpGet]
+ public ActionResult Edit(int id)
+ {
+     var student = db.Students.Find(id);
+     var d = db.Admissions.Where(e=>e.sid ==student.sid).ToList();
+     var s = new StudentVM()
+     {
+         sid = student.sid,
+         age = student.age,
+         ismorning = student.ismorning,
+         mark = student.mark,
+         picture = student.picture,
+         sname = student.sname,
+         CourseList = d,
+     };
+     return View(s);
+ }
+ //post
+ [HttpPost]
+ public ActionResult Edit(StudentVM StudentVM, int[] cid)
+ {
+     var student = db.Students.Find(StudentVM.sid);
+         student.sname = StudentVM.sname;
+         student.age = StudentVM.age;
+         student.mark = StudentVM.mark;
+         student.ismorning = StudentVM.ismorning;
+
+
+     HttpPostedFileBase file = StudentVM.pictureFile;
+     if (file != null)
+     {
+         string filename = Path.Combine("/images/", DateTime.Now.Ticks.ToString() + Path.GetExtension(file.FileName));
+         file.SaveAs(Server.MapPath(filename));
+         student.picture = filename;
+     }           
+     var d = db.Admissions.Where(e => e.sid == student.sid).ToList();
+     db.Admissions.RemoveRange(d);
+     foreach (var c in cid)
+     {
+         Admission ad = new Admission()
+         {
+             Student = student,
+             sid = student.sid,
+             cid = c,
+         };
+         db.Admissions.Add(ad);
+
+     }
+     db.SaveChanges();
+     return RedirectToAction("Index");
+ }
+ public ActionResult Delete(int ? id)
+ {
+     var student = db.Students.Find(id);
+     var d = db.Admissions.Where(e => e.sid == student.sid).ToList();
+     db.Admissions.RemoveRange(d);
+     db.Students.Remove(student);
+     db.SaveChanges();
+     return RedirectToAction("Index");
+ }
