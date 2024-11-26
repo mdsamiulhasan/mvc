@@ -1,0 +1,37 @@
+
+<h2>Index</h2>
+
+
+<h2>Student Information</h2>
+<a href="@Url.Action("Create","Student")" ,id="btnCreate">Create</a>
+@foreach (var a in Model)
+{
+    <div>
+        <img src="@a.picture" width="50" ; height="50"  style="border-radius:50%;" />
+        <label><b> Student : </b>@Html.DisplayFor(x => a.sname)</label>
+    </div>
+
+    <div>
+        <table class="table table-active">
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in a.Admissions)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(x => item.Course.cid)</td>
+                        <td>@Html.DisplayFor(x => item.Course.cname)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <a href="@Url.Action("Edit", "Student", new {id=a.sid})" >Edit</a>
+        <a href="@Url.Action("Delete", "Student", new {id=a.sid})">Delete</a>
+    </div>
+}
